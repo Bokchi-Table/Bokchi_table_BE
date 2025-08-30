@@ -11,24 +11,22 @@ public class SecurityConfig {
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .csrf(csrf -> csrf.disable())
+            .csrf(csrf -> csrf.disable())                 // Swagger에서 POST/PUT/DELETE 허용
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(
-                    "/",                       // 루트 허용
-                    "/swagger-ui.html",
-                    "/swagger-ui/**",
+                    "/", "/error",
+                    "/swagger-ui.html", "/swagger-ui/**",
                     "/v3/api-docs/**",
-                    "/api/users/signup",
-                    "/h2-console/**"
+                    "/h2-console/**",
+                    "/api/**"                              // ← 백엔드 전부 허용 (임시)
                 ).permitAll()
-                .anyRequest().authenticated()
+                .anyRequest().permitAll()                 // ← 혹시 빠진 경로 있어도 전부 통과
             )
-            .formLogin(form -> form.disable())
-            .httpBasic(basic -> basic.disable());
+            .formLogin(f -> f.disable())
+            .httpBasic(b -> b.disable());
 
-        // H2 콘솔 쓰는 경우 프레임옵션 해제
-        http.headers(headers -> headers.frameOptions(frame -> frame.disable()));
-
+        // H2 콘솔 쓰면 필요
+        http.headers(h -> h.frameOptions(f -> f.disable()));
         return http.build();
     }
 }
